@@ -41,7 +41,7 @@ services:
         - "traefik.http.routers.api.middlewares=auth"
         # Note: all dollar signs in the hash need to be doubled for escaping.
         # To create user:password pair, it's possible to use this command:
-        # echo $(htpasswd -nb user password) | sed -e s/\\$/\\$\\$/g
+        # echo $(htpasswd -nb username password) | sed -e s/\\$/\\$\\$/g
         - "traefik.http.middlewares.auth.basicauth.users=username:$$apr1$$CxPVmVqg$$nv54M6WvMesAVfeVHpf1x."
         # Dummy service for Swarm port detection. The port can be any valid integer value.
         - "traefik.http.services.dummy-svc.loadbalancer.server.port=9999"
