@@ -1,0 +1,50 @@
+---
+- hosts: all
+  remote_user: root
+
+  tasks:
+    - name: Install aptitude using apt
+      apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
+
+    - name: Install required system packages
+      apt: name={{ item }} state=latest update_cache=yes
+      loop: [ 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'gpg' ]
+
+    - name: Get which distro we are installing on (ubuntu or debian)
+      shell: lsb_release -is | tr '[:upper:]' '[:lower:]'
+      register: distro
+      ignore_errors: False
+
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/{{distro.stdout}}/gpg
+        state: present
+
+    - name: Get the current release of the OS
+      shell: /usr/bin/lsb_release -cs
+      register: release
+      ignore_errors: True
+
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/{{distro.stdout}} {{release.stdout}} stable
+        state: present
+
+    - name: Update apt and install docker
+      apt: name={{ item }} state=latest update_cache=yes
+      loop: [ 'docker-ce', 'docker-ce-cli', 'containerd.io' ]
+
+    - name: Initialise swarm
+      shell: docker swarm init --advertise-addr=192.248.150.98
+
+    - name: Create proxy network
+      shell: docker network create --driver=overlay proxy
+
+    - name: Copy traefik docker stack file
+      ansible.builtin.copy:
+        src: ./traefik.yml
+        dest: /root/traefik.yml
+
+    - name: Install traefik service
+      shell: docker stack deploy -c /root/traefik.yml traefik
+
