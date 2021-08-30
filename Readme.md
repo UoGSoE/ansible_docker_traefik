@@ -3,7 +3,7 @@ To run this, assuming you have `ansible` installed - first change the IP address
 shell: docker swarm init --advertise-addr=192.168.1.34
 ```
 
-Then run the playbook against the same IP :
+And change the password for the `traefik` dashboard in `traefik.yml` (there is a little explanation of how to do it in the file).  Then run the playbook against the same IP :
 ```bash
 ansible-playbook install_docker.yml -i 192.168.1.34,
 ```
